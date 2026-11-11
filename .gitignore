@@ -2,3 +2,9 @@
 build/
 *.pkg
 *.zip
+.build/
+
+# Nix
+/.direnv
+/.pre-commit-config.yaml
+/result
