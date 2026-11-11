@@ -8,3 +8,4 @@ build/
 /.direnv
 /.pre-commit-config.yaml
 /result
+/.pre-commit-config.yaml
