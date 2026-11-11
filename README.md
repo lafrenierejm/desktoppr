@@ -117,7 +117,7 @@ When the download fails, the wallpaper will not be changed. If the downloaded fi
 
 ## Managing the desktop picture/wallpaper with a profile
 
-When you run `desktoppr` with the `manage` verb, it will read the settings from the `com.scriptingosx.desktoppr` preference domain. You can set these settings with the `defaults` command or, preferably, by pushing a configuration profile from an MDM server. 
+When you run `desktoppr` with the `manage` verb, it will read the settings from the `com.scriptingosx.desktoppr` preference domain. You can set these settings with the `defaults` command or, preferably, by pushing a configuration profile from an MDM server.
 
 The idea is to run `desktoppr manage` with a LaunchAgent plist at login and/or at regular intervals. You can find [a sample LaunchAgent plist here](examples/com.scriptingosx.desktopprmanage.plist). The sample LaunchAgent will run `desktoppr manage` at login and every three hours (10800 sec). You can build a pkg that installs the desktoppr binary, the LaunchAgent plist and an image file very early in the deployment workflow and then desktoppr sets the desktop background when the user reaches the desktop for the first time.
 
@@ -159,4 +159,3 @@ The examples have [a sample defaults plist with keys](examples/defaults.plist) a
 You can get the code for `desktoppr` on my Github page and an installer in the [Releases](https://github.com/scriptingosx/desktoppr/releases). The installer pkg will install the binary in `/usr/local/bin`. Alternatively, a brew cask exists, so you could install it using `brew install --cask desktoppr` if you have [Homebrew](https://brew.sh) installed.
 
 The tool requires the [Swift 5 Runtime support for command line tools](https://support.apple.com/kb/DL1998) when you install it on versions of macOS older than 10.14.4.
-

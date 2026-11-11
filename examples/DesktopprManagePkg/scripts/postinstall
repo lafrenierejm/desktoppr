@@ -16,7 +16,7 @@ fi
 
 currentUser=$(echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }')
 
-# don't load at loginwindow 
+# don't load at loginwindow
 if [ "$currentUser" = "loginwindow" ] || [ "$currentUser" = "_mbsetupuser" ]; then
     echo "no user logged in, exiting"
     exit 0

@@ -38,7 +38,7 @@ uid=$(id -u "$loggedInUser")
 
 if [[ "$loggedInUser" != "loginwindow" ]]; then
     # set the desktop for the user
-    
+
     if [[ $(sw_vers -buildVersion) > "21" ]]; then
         # behavior with sudo seems to be broken in Montery
         # dropping the sudo will result in a warning that desktoprr seems to be

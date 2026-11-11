@@ -42,4 +42,3 @@ if [[ -n "$loggedInUser" ]]; then
 else
     echo "no user logged in, no desktop set"
 fi
-

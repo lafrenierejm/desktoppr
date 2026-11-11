@@ -53,7 +53,7 @@ then
     echo "productbuild failed with return code $returncode"
     exit $returncode
 fi
-    
+
 # remove interim component package file
 rm "${buildfolder}/${pkgname}.pkg"
 

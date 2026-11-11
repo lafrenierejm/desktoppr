@@ -157,7 +157,7 @@ func download(from url: URL) -> String? {
     }
     newImage = newURL
   }
-  
+
   downloadTask.resume()
   semaphore.wait()
   return newImage?.path
@@ -263,7 +263,7 @@ func allowClipping(for screen: NSScreen) -> Bool? {
 }
 
 
-// values map to the settings in Desktop pref pane as follwing:
+// values map to the settings in Desktop pref pane as following:
 // 0: (no value set in dict) Fill Screen
 // 1: Stretch to Fill Screen
 // 2: Center
@@ -406,7 +406,7 @@ func main() {
       for screen in NSScreen.screens {
         let s = imageScaling(for:screen)
         if s == nil {
-          print("unkown")
+          print("unknown")
         } else {
           print(s!.rawValue)
         }
@@ -472,4 +472,3 @@ func setFromDefaults() {
 }
 
 main()
-
