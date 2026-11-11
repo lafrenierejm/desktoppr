@@ -6,8 +6,8 @@
 //  Copyright © 2024 Scripting OS X. All rights reserved.
 //
 
-import Foundation
 import CryptoKit
+import Foundation
 
 @available(macOS 10.15, *)
 extension Data {

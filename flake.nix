@@ -100,7 +100,10 @@
             projectRootFile = ".git/config";
             package = pkgs.treefmt;
             flakeCheck = false; # use pre-commit's check instead
-            programs.nixfmt.enable = true;
+            programs = {
+              nixfmt.enable = true;
+              swift-format.enable = true;
+            };
           };
 
           devShells.default = pkgs.mkShell {

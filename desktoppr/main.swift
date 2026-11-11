@@ -18,13 +18,13 @@
  limitations under the License.
  */
 
-import Foundation
 import AppKit
 import CryptoKit
+import Foundation
 
 let version = "0.5"
 
-enum ScreenOption : Equatable {
+enum ScreenOption: Equatable {
   case all
   case main
   case index(Int)
@@ -34,7 +34,7 @@ enum ScreenOption : Equatable {
   case manage
 }
 
-enum ScaleOption : String {
+enum ScaleOption: String {
   case fill
   case stretch
   case center
@@ -42,43 +42,44 @@ enum ScaleOption : String {
 }
 
 func usage() {
-  errprint("""
-desktoppr: a tool to set the desktop picture
-  usage: desktoppr [all|main|N] [/path/to/image]
-         all:        all screens (default)
-         main:       main screen
-         N: (number) screen index
-         if a valid file path is given it will be set as the desktop picture,
-         otherwise the path to the current desktop picture is printed
+  errprint(
+    """
+    desktoppr: a tool to set the desktop picture
+      usage: desktoppr [all|main|N] [/path/to/image]
+             all:        all screens (default)
+             main:       main screen
+             N: (number) screen index
+             if a valid file path is given it will be set as the desktop picture,
+             otherwise the path to the current desktop picture is printed
 
-         The next two values will be set for _all_ screens.
-         color:      provide a hex color string (000000 to FFFFFF) for the background
-         scale:      fill | stretch | center | fit
-                     determines how the image is scaled to the screen
+             The next two values will be set for _all_ screens.
+             color:      provide a hex color string (000000 to FFFFFF) for the background
+             scale:      fill | stretch | center | fit
+                         determines how the image is scaled to the screen
 
-         manage:     read settings from com.scritpingosx.desktoppr preference domain
-                     see documentation for details
+             manage:     read settings from com.scritpingosx.desktoppr preference domain
+                         see documentation for details
 
-         https://github.com/scriptingosx/desktoppr
-""")
+             https://github.com/scriptingosx/desktoppr
+    """)
 }
 
 // allows easy printing to stdErr
 // from https://gist.github.com/algal/0a9aa5a4115d86d5cc1de7ea6d06bd91
-extension FileHandle : TextOutputStream {
+extension FileHandle: TextOutputStream {
   public func write(_ string: String) {
     guard let data = string.data(using: .utf8) else { return }
     self.write(data)
   }
 }
 
-func errprint(_ error : String) {
+func errprint(_ error: String) {
   var standardError = FileHandle.standardError
-  print(error, to:&standardError)
+  print(error, to: &standardError)
 }
 
 func parseOption(argument: String) -> ScreenOption? {
-  var option : ScreenOption?
+  var option: ScreenOption?
   switch argument {
   case "help":
     usage()
@@ -113,35 +114,41 @@ func parseOption(argument: String) -> ScreenOption? {
 }
 
 func download(from url: URL) -> String? {
-//  var headRequest = URLRequest(url: url)
-//  headRequest.httpMethod = "HEAD"
-//  let headSemaphore = DispatchSemaphore(value: 0)
-//  let headerTask = URLSession.shared.dataTask(with: headRequest) { _, response, error in
-//    defer { headSemaphore.signal() }
-//
-//    if let httpResponse = response as? HTTPURLResponse {
-//      print("http response code: \(httpResponse.statusCode)")
-//      print("header fields: \(httpResponse.allHeaderFields)")
-//    }
-//    print(response?.suggestedFilename)
-//  }
-//  headerTask.resume()
-//  headSemaphore.wait()
+  //  var headRequest = URLRequest(url: url)
+  //  headRequest.httpMethod = "HEAD"
+  //  let headSemaphore = DispatchSemaphore(value: 0)
+  //  let headerTask = URLSession.shared.dataTask(with: headRequest) { _, response, error in
+  //    defer { headSemaphore.signal() }
+  //
+  //    if let httpResponse = response as? HTTPURLResponse {
+  //      print("http response code: \(httpResponse.statusCode)")
+  //      print("header fields: \(httpResponse.allHeaderFields)")
+  //    }
+  //    print(response?.suggestedFilename)
+  //  }
+  //  headerTask.resume()
+  //  headSemaphore.wait()
 
   let request = URLRequest(url: url)
   var newImage: URL? = nil
   let semaphore = DispatchSemaphore(value: 0)
 
-  let downloadTask = URLSession.shared.downloadTask(with: request) { downloadedPicture, response, error in
+  let downloadTask = URLSession.shared.downloadTask(with: request) {
+    downloadedPicture, response, error in
     defer { semaphore.signal() }
 
     guard let downloadedPicture = downloadedPicture else { return }
     let filename = response?.suggestedFilename ?? downloadedPicture.lastPathComponent
-    guard let applicationSupportDir = try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true) else { return }
-    let desktopprSupportDir = applicationSupportDir.appendingPathComponent("desktoppr", isDirectory: true)
+    guard
+      let applicationSupportDir = try? FileManager.default.url(
+        for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+    else { return }
+    let desktopprSupportDir = applicationSupportDir.appendingPathComponent(
+      "desktoppr", isDirectory: true)
     if !FileManager.default.fileExists(atPath: desktopprSupportDir.path) {
       do {
-        try FileManager.default.createDirectory(at: desktopprSupportDir, withIntermediateDirectories: true, attributes: nil)
+        try FileManager.default.createDirectory(
+          at: desktopprSupportDir, withIntermediateDirectories: true, attributes: nil)
       } catch {
         return
       }
@@ -163,13 +170,14 @@ func download(from url: URL) -> String? {
   return newImage?.path
 }
 
-func parseURL(path : String) -> URL? {
+func parseURL(path: String) -> URL? {
   let fm = FileManager.default
   var imagePath = path
 
   if path.starts(with: "http://") || path.starts(with: "https://") {
     if let url = URL(string: path),
-       let downloadedImagePath = download(from: url) {
+      let downloadedImagePath = download(from: url)
+    {
       imagePath = downloadedImagePath
       Defaults.lastURL = path
     } else {
@@ -188,8 +196,8 @@ func parseURL(path : String) -> URL? {
   }
 }
 
-func colorFromHex(hexString : String) -> NSColor? {
-  var result : NSColor? = nil
+func colorFromHex(hexString: String) -> NSColor? {
+  var result: NSColor? = nil
 
   if let colorCode = Int(hexString, radix: 16) {
     let redByte = (colorCode >> 16) & 0xff
@@ -208,8 +216,7 @@ func colorFromHex(hexString : String) -> NSColor? {
   return result
 }
 
-
-func desktopImagePath(for screen : NSScreen) -> String {
+func desktopImagePath(for screen: NSScreen) -> String {
   let ws = NSWorkspace.shared
   return ws.desktopImageURL(for: screen)!.path
 }
@@ -223,7 +230,7 @@ func setAllDesktopImages(url: URL) {
   Defaults.lastSetDate = Date()
 }
 
-func setDesktopImage(url : URL, for screen : NSScreen) {
+func setDesktopImage(url: URL, for screen: NSScreen) {
   let ws = NSWorkspace.shared
   try! ws.setDesktopImageURL(url, for: screen)
 }
@@ -242,13 +249,15 @@ func setFillColor(color: NSColor) {
 func fillColor(for screen: NSScreen) -> String? {
   let ws = NSWorkspace.shared
   guard let options = ws.desktopImageOptions(for: screen) else { return nil }
-  guard let fillColor = options[NSWorkspace.DesktopImageOptionKey.fillColor] as? NSColor else { return nil }
+  guard let fillColor = options[NSWorkspace.DesktopImageOptionKey.fillColor] as? NSColor else {
+    return nil
+  }
 
   let redByte = Int(fillColor.redComponent * 0xff)
   let greenByte = Int(fillColor.greenComponent * 0xff)
   let blueByte = Int(fillColor.blueComponent * 0xff)
 
-  let hexString = String(format:"%02X%02X%02X", redByte, greenByte, blueByte)
+  let hexString = String(format: "%02X%02X%02X", redByte, greenByte, blueByte)
 
   return hexString
 }
@@ -257,11 +266,12 @@ func fillColor(for screen: NSScreen) -> String? {
 func allowClipping(for screen: NSScreen) -> Bool? {
   let ws = NSWorkspace.shared
   guard let options = ws.desktopImageOptions(for: screen) else { return nil }
-  guard let clip = options[NSWorkspace.DesktopImageOptionKey.allowClipping] as? NSNumber else { return false }
+  guard let clip = options[NSWorkspace.DesktopImageOptionKey.allowClipping] as? NSNumber else {
+    return false
+  }
 
   return clip.boolValue
 }
-
 
 // values map to the settings in Desktop pref pane as following:
 // 0: (no value set in dict) Fill Screen
@@ -271,16 +281,16 @@ func allowClipping(for screen: NSScreen) -> Bool? {
 
 func setImageScaling(_ scale: ScaleOption) {
   let ws = NSWorkspace.shared
-  let scaleValue : NSNumber?
+  let scaleValue: NSNumber?
   switch scale {
   case .fill:
     scaleValue = nil
   case .stretch:
-    scaleValue = NSNumber(integerLiteral: 1) // NSImageScaling.scaleAxesIndependently
+    scaleValue = NSNumber(integerLiteral: 1)  // NSImageScaling.scaleAxesIndependently
   case .center:
-    scaleValue = NSNumber(integerLiteral: 2) // NSImageScaling.scaleNone
+    scaleValue = NSNumber(integerLiteral: 2)  // NSImageScaling.scaleNone
   case .fit:
-    scaleValue = NSNumber(integerLiteral: 3) // NSImageScaling.scaleProportionallyUpOrDown
+    scaleValue = NSNumber(integerLiteral: 3)  // NSImageScaling.scaleProportionallyUpOrDown
   }
 
   // loop through all screens
@@ -297,12 +307,11 @@ func setImageScaling(_ scale: ScaleOption) {
   }
 }
 
-
 func imageScaling(for screen: NSScreen) -> ScaleOption? {
   let ws = NSWorkspace.shared
   guard let options = ws.desktopImageOptions(for: screen) else { return nil }
   let imageScalingValue = options[NSWorkspace.DesktopImageOptionKey.imageScaling] as? NSNumber
-  var imageScaling : ScaleOption?
+  var imageScaling: ScaleOption?
   if imageScalingValue == nil {
     imageScaling = .fill
   } else {
@@ -325,9 +334,9 @@ func main() {
   let arguments = CommandLine.arguments.dropFirst()
 
   var screenOption = ScreenOption.all
-  var fileURL : URL?
-  var color : NSColor?
-  var scale : ScaleOption?
+  var fileURL: URL?
+  var color: NSColor?
+  var scale: ScaleOption?
 
   switch arguments.count {
   case 0:
@@ -364,7 +373,9 @@ func main() {
 
   // display warning if running as root
   if ProcessInfo.processInfo.userName == "root" {
-    errprint("desktoppr is running as root. This is probably not what you are intending. To set the desktop picture for a user, desktoppr needs to run as that user.")
+    errprint(
+      "desktoppr is running as root. This is probably not what you are intending. To set the desktop picture for a user, desktoppr needs to run as that user."
+    )
   }
 
   switch screenOption {
@@ -404,7 +415,7 @@ func main() {
   case .scale:
     if scale == nil {
       for screen in NSScreen.screens {
-        let s = imageScaling(for:screen)
+        let s = imageScaling(for: screen)
         if s == nil {
           print("unknown")
         } else {
@@ -442,14 +453,14 @@ func setFromDefaults() {
         }
       }
 
-
       if Defaults.setOnlyOnce {
         // check if we have set this path already
         // this allows the user to change the wallpaper without us overwriting it
         if Defaults.lastURL != Defaults.picturePath && Defaults.lastPath != Defaults.picturePath {
 
           if let colorString = Defaults.color,
-             let color = colorFromHex(hexString: colorString) {
+            let color = colorFromHex(hexString: colorString)
+          {
             setFillColor(color: color)
           }
 
@@ -459,7 +470,8 @@ func setFromDefaults() {
         }
       } else {
         if let color = Defaults.color,
-           let parsedColor = colorFromHex(hexString: color) {
+          let parsedColor = colorFromHex(hexString: color)
+        {
           setFillColor(color: parsedColor)
         }
 

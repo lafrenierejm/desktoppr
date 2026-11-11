@@ -33,7 +33,7 @@ struct Defaults {
 
   static var scale: ScaleOption {
     guard let scale = defaults.string(forKey: scaleKey),
-          let scaleOption = ScaleOption(rawValue: scale)
+      let scaleOption = ScaleOption(rawValue: scale)
     else { return .fill }
     return scaleOption
   }
