@@ -6,9 +6,5 @@
 	<string>com.scriptingosx.desktoppr</string>
 	<key>CFBundleName</key>
 	<string>desktoppr</string>
-	<key>CFBundleShortVersionString</key>
-	<string>$(MARKETING_VERSION)</string>
-	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
 </dict>
 </plist>

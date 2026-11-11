@@ -8,6 +8,10 @@
   outputs =
     { self, nixpkgs }:
     let
+      # Single source of truth for the version: `let version = "x.y"` in main.swift.
+      version = builtins.head (
+        builtins.match ''.*let version = "([^"]+)".*'' (builtins.readFile ./desktoppr/main.swift)
+      );
       systems = [
         "aarch64-darwin"
         "x86_64-darwin"
@@ -18,7 +22,7 @@
       packages = forAllSystems (pkgs: rec {
         desktoppr = pkgs.stdenv.mkDerivation {
           pname = "desktoppr";
-          version = "0.5";
+          inherit version;
 
           src = pkgs.lib.fileset.toSource {
             root = ./.;
@@ -32,15 +36,6 @@
             pkgs.swift
             pkgs.swiftpm
           ];
-
-          # Xcode substitutes these build settings into Info.plist; do the same.
-          # Xcode's auto-incremented build number is not tracked here, so
-          # CFBundleVersion uses the marketing version too.
-          postPatch = ''
-            substituteInPlace desktoppr/Info.plist \
-              --replace-fail '$(MARKETING_VERSION)' "$version" \
-              --replace-fail '$(CURRENT_PROJECT_VERSION)' "$version"
-          '';
 
           # The swiftpm setup hook provides configure/build phases;
           # only installation of the executable is custom.

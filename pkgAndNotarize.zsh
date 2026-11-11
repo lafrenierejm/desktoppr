@@ -1,122 +1,121 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 
-#  pkgAndNotarize.sh
+#  pkgAndNotarize.zsh
 #  desktoppr
 #
-#  Created by Armin Briegel on 2023-11-21.
-#  
+#  Builds a universal, signed release binary with SwiftPM, wraps it in a
+#  signed installer pkg, and (for the maintainer's team) notarizes it.
+#
+#  Usage: DEVELOPMENT_TEAM=<team id> ./pkgAndNotarize.zsh
+#
+#  Requires the Xcode toolchain, plus "Developer ID Application" and
+#  "Developer ID Installer" identities for the team in the keychain.
 
-# data from build settings
-pkg_name="$PRODUCT_NAME"
-identifier="$PRODUCT_BUNDLE_IDENTIFIER"
-version="$MARKETING_VERSION"
-build_number="$CURRENT_PROJECT_VERSION"
-min_os_version="$MACOSX_DEPLOYMENT_TARGET"
+set -euo pipefail
 
-build_dir="$BUILD_DIR"
-if [[ ! -d $build_dir ]]; then
-    mkdir -p $build_dir
+cd "${0:A:h}"
+srcroot="$PWD"
+
+: "${DEVELOPMENT_TEAM:?set DEVELOPMENT_TEAM to your Apple Developer team ID}"
+
+pkg_name="desktoppr"
+identifier="com.scriptingosx.desktoppr"
+min_os_version="10.13"
+
+# the version lives in main.swift
+version=$(sed -nE 's/^let version = "([^"]+)".*/\1/p' desktoppr/main.swift)
+if [[ -z $version ]]; then
+  echo "error: could not read version from desktoppr/main.swift"
+  exit 1
 fi
 
-artifacts_dir="$SRCROOT/build/Artifacts"
-if [[ ! -d $artifacts_dir ]]; then
-    mkdir -p $artifacts_dir
+build_dir="$srcroot/build"
+artifacts_dir="$build_dir/Artifacts"
+pkg_root="$build_dir/pkgroot"
+mkdir -p "$artifacts_dir"
+
+component_path="$build_dir/$pkg_name.pkg"
+product_path="$artifacts_dir/$pkg_name-$version.pkg"
+zip_path="$artifacts_dir/$pkg_name-$version.zip"
+log_path="$artifacts_dir/pkg_build.log"
+
+exec > >(tee -a "$log_path") 2>&1
+
+# find signing identities by team ID
+app_cert=$(security find-identity -p codesigning -v \
+  | awk '/Developer ID Application/ && /'"$DEVELOPMENT_TEAM"'/ {print $2; exit}')
+sign_cert=$(security find-identity -p basic -v \
+  | awk '/Developer ID Installer/ && /'"$DEVELOPMENT_TEAM"'/ {print $2; exit}')
+
+if [[ -z $app_cert ]]; then
+  echo "error: could not find Developer ID Application identity for $DEVELOPMENT_TEAM"
+  exit 1
 fi
-
-logs_dir="$SRCROOT/build/Logs"
-if [[ ! -d $logs_dir ]]; then
-    mkdir -p $logs_dir
-fi
-
-
-component_path="${build_dir}/${pkg_name}.pkg"
-product_path="${artifacts_dir}/${pkg_name}-${version}-${build_number}.pkg"
-notary_log="${artifacts_dir}/pkg_build.log"
-
-exec > >(tee -a "$notary_log") 2>&1
-
-# Developer ID Installer cert name
-#sign_cert="Developer ID Installer: Armin Briegel (JME5BW3F3R)"
-sign_cert=$(security find-identity -p basic -v | awk '/Developer ID Installer/ && /'$DEVELOPMENT_TEAM'/ {print $2; exit}')
-
-if [[ $sign_cert == "" ]]; then
+if [[ -z $sign_cert ]]; then
   echo "error: could not find Developer ID Installer identity for $DEVELOPMENT_TEAM"
   exit 1
 fi
 
-
-echo "note: Packaging and Notarizing '$pkg_name', version: $version, build: $build_number"
+echo "note: Packaging and Notarizing '$pkg_name', version: $version"
 date +"%F %T"
 echo "note: Min OS Version:    $min_os_version"
 echo "note: Development Team:  $DEVELOPMENT_TEAM"
-echo "note: Installer cert ID: $sign_cert"
+echo "note: Application cert:  $app_cert"
+echo "note: Installer cert:    $sign_cert"
 echo
 
-# print environment variables
-# env | sort
+# build a universal release binary
+echo "note: building"
+swift build -c release --arch arm64 --arch x86_64
+bin_path="$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)/$pkg_name"
 
-echo
+# sign with hardened runtime and a secure timestamp (required for notarization)
+codesign --force --sign "$app_cert" --options runtime --timestamp \
+         --identifier "$identifier" "$bin_path"
+codesign --verify --strict --verbose=2 "$bin_path"
 
-# set -x
-
-# usually use `xcodebuild -exportArchive` to get
-# the product out of the archive. However, this does not work
-# with a command line tool, so we are going direct
-# use INSTALL_ROOT when running with install
-# use ARCHIVE_PATH after archiving
-if [[ $ARCHIVE_PATH != "" ]]; then
-  pkg_root="$ARCHIVE_PATH/Products/"
-else
-  pkg_root="$INSTALL_ROOT"
-fi
+# stage the pkg payload
+rm -rf "$pkg_root"
+mkdir -p "$pkg_root/usr/local/bin"
+cp "$bin_path" "$pkg_root/usr/local/bin/"
 
 # copy the finished binary to the pkg payload in the examples
-cp "$pkgroot/usr/local/bin/desktoppr" "$SRCROOT/examples/payload/usr/local/bin/"
+cp "$bin_path" "$srcroot/examples/DesktopprManagePkg/payload/usr/local/bin/"
 
 # create the component pkg
 echo "note: building component: $component_path"
-
-if ! pkgbuild --root "$pkg_root" \
+pkgbuild --root "$pkg_root" \
          --identifier "$identifier" \
-         --version "$version-$build_number" \
+         --version "$version" \
          --install-location "/" \
          --min-os-version "$min_os_version" \
          --compression legacy \
          "$component_path"
-then
-  echo "error: error build component"
-  exit 2
-fi
 
 echo
 
 # create the distribution pkg
 echo "note: building distribution pkg: $product_path"
-
-if ! productbuild --package "$component_path" \
-                  --identifier "$identifier" \
-                  --version "$version-$build_number" \
-                  --sign "$sign_cert" \
-                  "$product_path"
-then
-  echo "error: error building distribution archive"
-  exit 3
-fi
+productbuild --package "$component_path" \
+             --identifier "$identifier" \
+             --version "$version" \
+             --sign "$sign_cert" \
+             "$product_path"
 
 echo
 
 # clean up component pkg
 rm "$component_path"
 
-# only continue when development team is me
+# only notarize when the development team is the maintainer's
 if [[ $DEVELOPMENT_TEAM != "JME5BW3F3R" ]]; then
+  echo "note: skipping notarization for team $DEVELOPMENT_TEAM"
   exit 0
 fi
 
 # profile name used with `notarytool --store-credentials`
 credential_profile="notary-scriptingosx"
 
-# notarize
 echo "note: submitting for notarization"
 xcrun notarytool submit "$product_path" \
                  --keychain-profile "$credential_profile" \
@@ -124,29 +123,20 @@ xcrun notarytool submit "$product_path" \
 
 echo
 
-# staple
 xcrun stapler staple "$product_path"
 
 echo
 
-# also create a zip archive
-zippath="$artifacts_dir/$pkg_name-$version-$build_number.zip"
-echo "note: zip archive: $zippath"
-zip "$zippath" -j "$pkgroot"/usr/local/bin/desktoppr
+# also create a zip archive of the binary
+echo "note: zip archive: $zip_path"
+rm -f "$zip_path"
+zip "$zip_path" -j "$pkg_root/usr/local/bin/$pkg_name"
 
 echo "note: notarizing zip archive"
-# upload zip for notarization
-xcrun notarytool submit "$zippath"  \
+xcrun notarytool submit "$zip_path" \
                  --keychain-profile "$credential_profile" \
                  --wait
 
 echo
 echo '## Done!'
-
-# notify
-osascript -e "display notification \"$pkg_name ($version, $build_number) built and notarized\""
-
-# reveal in Finder
-open -R "$product_path"
-
-exit 0
+echo "note: $product_path"
