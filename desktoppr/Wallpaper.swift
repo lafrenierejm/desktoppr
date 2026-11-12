@@ -38,21 +38,6 @@ private final class Locked<Value: Sendable>: @unchecked Sendable {
 }
 
 func download(from url: URL) -> String? {
-  //  var headRequest = URLRequest(url: url)
-  //  headRequest.httpMethod = "HEAD"
-  //  let headSemaphore = DispatchSemaphore(value: 0)
-  //  let headerTask = URLSession.shared.dataTask(with: headRequest) { _, response, error in
-  //    defer { headSemaphore.signal() }
-  //
-  //    if let httpResponse = response as? HTTPURLResponse {
-  //      print("http response code: \(httpResponse.statusCode)")
-  //      print("header fields: \(httpResponse.allHeaderFields)")
-  //    }
-  //    print(response?.suggestedFilename)
-  //  }
-  //  headerTask.resume()
-  //  headSemaphore.wait()
-
   let request = URLRequest(url: url)
   let newImage = Locked<URL>()
   let semaphore = DispatchSemaphore(value: 0)
