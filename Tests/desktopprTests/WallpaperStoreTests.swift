@@ -14,8 +14,9 @@ private enum Fixture {
       fromPropertyList: configuration, format: .binary, options: 0)
   }
 
-  /// Round-trips `plist` the way `WallpaperStore.load` reads the store, so every
-  /// nested container is mutable. Swift dictionary literals are not.
+  /// Round-trips `plist` the way `WallpaperStore.load` reads the store.
+  ///
+  /// Every nested container ends up mutable, which Swift dictionary literals are not.
   static func mutable(_ plist: [String: Any]) -> NSMutableDictionary {
     let data = try! PropertyListSerialization.data(
       fromPropertyList: plist, format: .binary, options: 0)

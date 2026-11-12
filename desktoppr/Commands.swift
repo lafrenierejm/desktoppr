@@ -148,7 +148,9 @@ struct Manage: ParsableCommand {
     try setAllDesktopImages(url: fileURL, allSpaces: Defaults.allSpaces)
   }
 
-  /// Compares against the configured checksum, if any. Exits with 9 on a mismatch.
+  /// Compares against the configured checksum, if any.
+  ///
+  /// Exits with 9 on a mismatch.
   private func verifyChecksum(of url: URL) throws {
     let checks: [(name: String, expected: String?, actual: (Data) -> String)] = [
       ("sha256", Defaults.sha256, { $0.sha256 }),

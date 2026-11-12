@@ -74,6 +74,7 @@ enum WallpaperStore {
   }
 
   /// Copies the newest entry referencing `image` over every other entry.
+  ///
   /// Returns false, leaving `index` untouched, if no entry references `image`.
   static func apply(image: URL, to index: NSMutableDictionary) -> Bool {
     let holders = desktopHolders(in: index)

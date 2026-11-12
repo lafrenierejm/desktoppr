@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "rules": {
+    "AlwaysUseLiteralForEmptyCollectionInit": true,
+    "BeginDocumentationCommentWithOneLineSummary": true,
+    "UseEarlyExits": true,
+    "UseWhereClausesInForLoops": true,
+    "ValidateDocumentationComments": true
+  }
+}
