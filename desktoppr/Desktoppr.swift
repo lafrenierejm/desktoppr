@@ -17,7 +17,10 @@ struct RuntimeError: Error, CustomStringConvertible {
 func warnIfRoot() {
   guard ProcessInfo.processInfo.userName == "root" else { return }
   errprint(
-    "desktoppr is running as root. This is probably not what you are intending. To set the desktop picture for a user, desktoppr needs to run as that user."
+    """
+    desktoppr is running as root. This is probably not what you are intending. \
+    To set the desktop picture for a user, desktoppr needs to run as that user.
+    """
   )
 }
 

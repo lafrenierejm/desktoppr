@@ -43,7 +43,7 @@ func download(from url: URL) -> String? {
   let semaphore = DispatchSemaphore(value: 0)
 
   let downloadTask = URLSession.shared.downloadTask(with: request) {
-    downloadedPicture, response, error in
+    downloadedPicture, response, _ in
     defer { semaphore.signal() }
 
     guard let downloadedPicture = downloadedPicture else { return }
@@ -107,7 +107,7 @@ func desktopImagePath(for screen: NSScreen) -> String {
 
 func setAllDesktopImages(url: URL, allSpaces: Bool = false) throws {
   for screen in NSScreen.screens {
-    setDesktopImage(url: url, for: screen)
+    try setDesktopImage(url: url, for: screen)
   }
 
   Defaults.lastPath = url.path
@@ -138,19 +138,19 @@ func restartWallpaperAgent() {
   }
 }
 
-func setDesktopImage(url: URL, for screen: NSScreen) {
+func setDesktopImage(url: URL, for screen: NSScreen) throws {
   let ws = NSWorkspace.shared
-  try! ws.setDesktopImageURL(url, for: screen)
+  try ws.setDesktopImageURL(url, for: screen)
 }
 
-func setFillColor(color: NSColor) {
+func setFillColor(color: NSColor) throws {
   let ws = NSWorkspace.shared
   // loop through all screens
   for screen in NSScreen.screens {
     let currentImageURL = ws.desktopImageURL(for: screen)
     var options = ws.desktopImageOptions(for: screen)
     options![NSWorkspace.DesktopImageOptionKey.fillColor] = color
-    try! ws.setDesktopImageURL(currentImageURL!, for: screen, options: options!)
+    try ws.setDesktopImageURL(currentImageURL!, for: screen, options: options!)
   }
 }
 
@@ -187,18 +187,18 @@ func allowClipping(for screen: NSScreen) -> Bool? {
 // 2: Center
 // 3: Fit to Screen
 
-func setImageScaling(_ scale: ScaleOption) {
+func setImageScaling(_ scale: ScaleOption) throws {
   let ws = NSWorkspace.shared
   let scaleValue: NSNumber?
   switch scale {
   case .fill:
     scaleValue = nil
   case .stretch:
-    scaleValue = NSNumber(integerLiteral: 1)  // NSImageScaling.scaleAxesIndependently
+    scaleValue = NSNumber(value: 1)  // NSImageScaling.scaleAxesIndependently
   case .center:
-    scaleValue = NSNumber(integerLiteral: 2)  // NSImageScaling.scaleNone
+    scaleValue = NSNumber(value: 2)  // NSImageScaling.scaleNone
   case .fit:
-    scaleValue = NSNumber(integerLiteral: 3)  // NSImageScaling.scaleProportionallyUpOrDown
+    scaleValue = NSNumber(value: 3)  // NSImageScaling.scaleProportionallyUpOrDown
   }
 
   // loop through all screens
@@ -211,7 +211,7 @@ func setImageScaling(_ scale: ScaleOption) {
     } else {
       options![scalingKey] = scaleValue
     }
-    try! ws.setDesktopImageURL(currentImageURL!, for: screen, options: options!)
+    try ws.setDesktopImageURL(currentImageURL!, for: screen, options: options!)
   }
 }
 

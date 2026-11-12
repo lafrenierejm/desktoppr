@@ -61,7 +61,7 @@ struct Picture: ParsableCommand {
       try setAllDesktopImages(url: url, allSpaces: allSpaces)
     } else {
       for screen in targets {
-        setDesktopImage(url: url, for: screen)
+        try setDesktopImage(url: url, for: screen)
       }
     }
   }
@@ -78,7 +78,7 @@ struct Color: ParsableCommand {
   func run() throws {
     warnIfRoot()
     if let color = color {
-      setFillColor(color: color.color)
+      try setFillColor(color: color.color)
     } else {
       for screen in NSScreen.screens {
         print(fillColor(for: screen) ?? "cannot get color")
@@ -98,7 +98,7 @@ struct Scale: ParsableCommand {
   func run() throws {
     warnIfRoot()
     if let mode = mode {
-      setImageScaling(mode)
+      try setImageScaling(mode)
     } else {
       for screen in NSScreen.screens {
         print(imageScaling(for: screen)?.rawValue ?? "unknown")
@@ -133,9 +133,8 @@ struct Manage: ParsableCommand {
 
     // With `setOnlyOnce`, skip pictures already set, so the user can change the
     // wallpaper without it being overwritten.
-    if Defaults.setOnlyOnce,
-      Defaults.lastURL == picturePath || Defaults.lastPath == picturePath
-    {
+    let alreadySet = Defaults.lastURL == picturePath || Defaults.lastPath == picturePath
+    if Defaults.setOnlyOnce && alreadySet {
       return
     }
 
@@ -143,9 +142,9 @@ struct Manage: ParsableCommand {
       guard let color = HexColor(argument: colorString) else {
         throw RuntimeError("could not parse color: \(colorString)")
       }
-      setFillColor(color: color.color)
+      try setFillColor(color: color.color)
     }
-    setImageScaling(Defaults.scale)
+    try setImageScaling(Defaults.scale)
     try setAllDesktopImages(url: fileURL, allSpaces: Defaults.allSpaces)
   }
 
