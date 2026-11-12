@@ -1,0 +1,4 @@
+# Force casts and tries are fine in tests, where a failure should crash the test.
+disabled_rules:
+  - force_cast
+  - force_try

@@ -121,6 +121,13 @@
               trim-trailing-whitespace.enable = true;
               treefmt.enable = true;
               typos.enable = true;
+              # The prebuilt binary can't find sourcekitd under Nix, so skip the rules that need it.
+              swiftlint = {
+                enable = true;
+                package = pkgs.swiftlint;
+                entry = "${pkgs.lib.getExe pkgs.swiftlint} lint --strict --disable-sourcekit --no-cache";
+                types = [ "swift" ];
+              };
             };
           };
 
@@ -137,6 +144,8 @@
           devShells.default = pkgs.mkShell {
             # See the comment on the package's `env`.
             env.NIX_CC_WRAPPER_SUPPRESS_TARGET_WARNING = "1";
+            # SwiftLint's prebuilt binary can't find sourcekitd under Nix.
+            env.SWIFTLINT_DISABLE_SOURCEKIT = "1";
             # Inherit all of the pre-commit and treefmt hooks.
             inputsFrom = [
               config.pre-commit.devShell

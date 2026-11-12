@@ -1,0 +1,20 @@
+# swift-format owns formatting, so turn off the rules that conflict with its output.
+disabled_rules:
+  - trailing_comma
+  - closure_parameter_position
+
+# Two-letter names for the usual Foundation/AppKit singletons.
+identifier_name:
+  excluded:
+    - fm
+    - ws
+
+large_tuple: 3
+
+line_length:
+  ignores_urls: true
+
+included:
+  - Package.swift
+  - Tests
+  - desktoppr
