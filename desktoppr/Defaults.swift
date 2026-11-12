@@ -9,7 +9,7 @@
 import Foundation
 
 struct Defaults {
-  static let defaults = UserDefaults.standard
+  static var defaults: UserDefaults { .standard }
 
   static let picturePathKey = "picture"
   static let colorKey = "color"

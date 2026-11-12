@@ -36,7 +36,5 @@ let package = Package(
       ],
       path: "Tests/desktopprTests"
     ),
-  ],
-  // The sources predate Swift 6 strict concurrency.
-  swiftLanguageModes: [.v5]
+  ]
 )

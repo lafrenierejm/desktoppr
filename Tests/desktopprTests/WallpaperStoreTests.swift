@@ -165,12 +165,14 @@ private enum Fixture {
     #expect(WallpaperStore.references(desktop, image: link))
   }
 
-  private static let malformedEntries: [NSDictionary] = [
-    [:],
-    ["Content": [:]],
-    ["Content": ["Choices": [["Configuration": Data("not a plist".utf8)]]]],
-    ["Content": ["Choices": [["Configuration": Fixture.configuration("")]]]],
-  ]
+  private static var malformedEntries: [NSDictionary] {
+    [
+      [:],
+      ["Content": [:]],
+      ["Content": ["Choices": [["Configuration": Data("not a plist".utf8)]]]],
+      ["Content": ["Choices": [["Configuration": Fixture.configuration("")]]]],
+    ]
+  }
 
   @Test(arguments: 0..<4)
   func referencesIgnoresMalformedEntries(index: Int) {
