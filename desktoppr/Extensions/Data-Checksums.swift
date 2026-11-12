@@ -9,7 +9,6 @@
 import CryptoKit
 import Foundation
 
-@available(macOS 10.15, *)
 extension Data {
   var md5: String {
     Insecure.MD5.hash(data: self).hexString

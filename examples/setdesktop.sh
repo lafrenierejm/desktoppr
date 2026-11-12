@@ -35,9 +35,9 @@ if [[ -n "$loggedInUser" ]]; then
         # behavior with sudo seems to be broken in Montery
         # dropping the sudo will result in a warning that desktoprr seems to be
         # running as root, but it will still work
-        launchctl asuser "$uid" "$desktoppr" "$picturepath"
+        launchctl asuser "$uid" "$desktoppr" picture "$picturepath"
     else
-        sudo -u "$loggedInUser" launchctl asuser "$uid" "$desktoppr" "$picturepath"
+        sudo -u "$loggedInUser" launchctl asuser "$uid" "$desktoppr" picture "$picturepath"
     fi
 else
     echo "no user logged in, no desktop set"

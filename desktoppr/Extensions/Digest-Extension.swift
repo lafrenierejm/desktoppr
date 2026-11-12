@@ -9,7 +9,6 @@
 import CryptoKit
 import Foundation
 
-@available(macOS 10.15, *)
 extension Digest {
   var bytes: [UInt8] {
     Array(makeIterator())

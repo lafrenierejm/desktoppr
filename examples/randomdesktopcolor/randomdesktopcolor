@@ -20,7 +20,7 @@ echo "random color: $red$green$blue"
 
 # set the transparent desktop pictures
 if [[ -f $transparentDesktop ]]; then
-    $desktoppr $transparentDesktop
+    $desktoppr picture $transparentDesktop
     $desktoppr color $red$green$blues
     sleep 0.1
     $desktoppr scale center

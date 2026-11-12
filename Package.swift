@@ -1,12 +1,19 @@
-// swift-tools-version:5.6
+// swift-tools-version:6.0
 import PackageDescription
 
 let package = Package(
   name: "desktoppr",
-  platforms: [.macOS(.v10_13)],
+  // swift-argument-parser links Swift Concurrency, which ships with macOS 12.
+  platforms: [.macOS(.v12)],
+  dependencies: [
+    .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.8.2")
+  ],
   targets: [
     .executableTarget(
       name: "desktoppr",
+      dependencies: [
+        .product(name: "ArgumentParser", package: "swift-argument-parser")
+      ],
       path: "desktoppr",
       // Info.plist is embedded via the linker below, not treated as a resource.
       exclude: ["Info.plist", "ToDo.markdown"],
@@ -21,5 +28,7 @@ let package = Package(
         ])
       ]
     )
-  ]
+  ],
+  // The sources predate Swift 6 strict concurrency.
+  swiftLanguageModes: [.v5]
 )

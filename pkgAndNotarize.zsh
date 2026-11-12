@@ -20,12 +20,12 @@ srcroot="$PWD"
 
 pkg_name="desktoppr"
 identifier="com.scriptingosx.desktoppr"
-min_os_version="10.13"
+min_os_version="12"
 
-# the version lives in main.swift
-version=$(sed -nE 's/^let version = "([^"]+)".*/\1/p' desktoppr/main.swift)
+# the version lives in Desktoppr.swift
+version=$(sed -nE 's/^let version = "([^"]+)".*/\1/p' desktoppr/Desktoppr.swift)
 if [[ -z $version ]]; then
-  echo "error: could not read version from desktoppr/main.swift"
+  echo "error: could not read version from desktoppr/Desktoppr.swift"
   exit 1
 fi
 

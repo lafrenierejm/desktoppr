@@ -17,9 +17,9 @@
   outputs =
     inputs:
     let
-      # Single source of truth for the version: `let version = "x.y"` in main.swift.
+      # Single source of truth for the version: `let version = "x.y"` in Desktoppr.swift.
       version = builtins.head (
-        builtins.match ''.*let version = "([^"]+)".*'' (builtins.readFile ./desktoppr/main.swift)
+        builtins.match ''.*let version = "([^"]+)".*'' (builtins.readFile ./desktoppr/Desktoppr.swift)
       );
     in
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
@@ -40,7 +40,7 @@
         }:
         {
           packages = {
-            desktoppr = pkgs.stdenv.mkDerivation {
+            desktoppr = pkgs.stdenv.mkDerivation (finalAttrs: {
               pname = "desktoppr";
               inherit version;
 
@@ -48,6 +48,7 @@
                 root = ./.;
                 fileset = pkgs.lib.fileset.unions [
                   ./Package.swift
+                  ./Package.resolved
                   ./desktoppr
                 ];
               };
@@ -57,7 +58,14 @@
                 swiftpm
               ];
 
-              # The swiftpm setup hook provides configure/build phases;
+              # The dependencies pinned in `Package.resolved`.
+              # Refresh `hash` after updating dependencies by setting to empty string and copying the hash from the error.
+              swiftpmDeps = pkgs.swiftPackages.fetchSwiftPMDeps {
+                inherit (finalAttrs) pname version src;
+                hash = "sha256-XX+fWkYhDCMMzBfWqHCDelM21Df5ZPwHCB6IDlWCokI=";
+              };
+
+              # The swiftpm setup hook provides the configure and build phases;
               # only installation of the executable is custom.
               installPhase = ''
                 runHook preInstall
@@ -72,7 +80,7 @@
                 platforms = pkgs.lib.platforms.darwin;
                 mainProgram = "desktoppr";
               };
-            };
+            });
             default = self'.packages.desktoppr;
           };
 
@@ -117,6 +125,7 @@
               ++ (with pkgs; [
                 swift
                 swiftpm
+                swiftPackages.sourcekit-lsp
               ]);
           };
         };
