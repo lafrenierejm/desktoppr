@@ -85,6 +85,16 @@ Setting the wallpaper, scale and/or color are separate commands.
 
 Note: setting the background color does not work in macOS 14.x. See [issue #22](https://github.com/scriptingosx/desktoppr/issues/22). This was fixed by Apple in macOS 15.4.
 
+## Setting the picture for all Spaces
+
+macOS keeps a separate wallpaper for every Space (desktop), and `desktoppr` normally only changes the current Space's. To also set the picture on every existing Space, and on Spaces you create later, add `--all-spaces`:
+
+```
+$ desktoppr picture --all-spaces "/Library/Desktop Pictures/BoringBlueDesktop.png"
+```
+
+`--all-spaces` only applies when setting a picture on all screens, so it needs a picture and cannot be combined with `--screen main` or a screen index. It works by copying the new setting within macOS's private wallpaper store (`~/Library/Application Support/com.apple.wallpaper/Store/Index.plist`), which Apple does not document and may change. `desktoppr` waits up to 15 seconds for macOS to record the new picture and exits with an error if that does not happen.
+
 ## Using `desktoppr` in scripts
 
 When you run multiple `desktoppr` commands in sequence in a script, the subsequent commands might not "take." Insert a `sleep 1` command in between to allow the process managing the wallpaper to "catch up."
@@ -153,6 +163,10 @@ One of `fill` (default), `stretch`, `center`, or `fit`. This controls the scalin
 When set to `true`, `desktoppr manage` will not re-set the desktop picture/wallpaper if the last picture `desktoppr manage` set was the same. Use this to set the desktop image/wallpaper once from a configuration profile but allow the user to change it afterward. Even when `desktoppr manage` runs frequently, it should only re-set the desktop picture/wallpaper when the setting in the configuration profile changes.
 
 When set to `false`, `desktoppr manage` will re-apply the managed settings every time.
+
+#### `allSpaces` (type: boolean, default: `false`)
+
+When set to `true`, `desktoppr manage` also sets the picture for every Space, as `desktoppr picture --all-spaces` does on the command line.
 
 The examples have [a sample defaults plist with keys](examples/defaults.plist) and [a sample configuration profile](examples/desktoppr-profile.mobileconfig).
 

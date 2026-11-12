@@ -109,13 +109,21 @@ func desktopImagePath(for screen: NSScreen) -> String {
   return ws.desktopImageURL(for: screen)!.path
 }
 
-func setAllDesktopImages(url: URL) {
+func setAllDesktopImages(url: URL, allSpaces: Bool = false) throws {
   for screen in NSScreen.screens {
     setDesktopImage(url: url, for: screen)
   }
 
   Defaults.lastPath = url.path
   Defaults.lastSetDate = Date()
+
+  if allSpaces {
+    do {
+      try WallpaperStore.spread(image: url)
+    } catch {
+      throw RuntimeError("could not set the picture for all spaces: \(error)")
+    }
+  }
 }
 
 func setDesktopImage(url: URL, for screen: NSScreen) {

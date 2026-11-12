@@ -19,6 +19,7 @@ struct Defaults {
   static let lastURLKey = "lastURL"
   static let lastSetDateKey = "lastSetDate"
   static let respectUserChangeKey = "respectUserChange"
+  static let allSpacesKey = "allSpaces"
   static let md5Key = "md5"
   static let sha1Key = "sha1"
   static let sha256Key = "sha256"
@@ -59,6 +60,10 @@ struct Defaults {
 
   static var respectUserChange: Bool {
     defaults.bool(forKey: respectUserChangeKey)
+  }
+
+  static var allSpaces: Bool {
+    defaults.bool(forKey: allSpacesKey)
   }
 
   static var md5: String? {

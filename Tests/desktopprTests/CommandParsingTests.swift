@@ -11,6 +11,16 @@ private func parse<Command: ParsableCommand>(
   return try #require(parsed as? Command, "parsed \(Swift.type(of: parsed))")
 }
 
+/// The message ArgumentParser would print for a command line that fails to parse.
+private func parseFailure(_ arguments: [String]) -> String {
+  do {
+    _ = try Desktoppr.parseAsRoot(arguments)
+    return "parsed without an error"
+  } catch {
+    return Desktoppr.message(for: error)
+  }
+}
+
 @Suite struct CommandParsingTests {
   // MARK: Root
 
@@ -108,6 +118,62 @@ private func parse<Command: ParsableCommand>(
   ])
   func pictureRejectsInvalidArguments(arguments: [String]) {
     #expect(throws: (any Error).self) { try Desktoppr.parseAsRoot(arguments) }
+  }
+
+  // MARK: picture --all-spaces
+
+  @Test func allSpacesIsOffByDefault() throws {
+    #expect(try parse(Picture.self, ["picture", "/a.png"]).allSpaces == false)
+  }
+
+  @Test(arguments: [
+    ["picture", "--all-spaces", "/a.png"],
+    ["picture", "/a.png", "--all-spaces"],
+    ["picture", "--all-spaces", "--screen", "all", "/a.png"],
+    ["picture", "--screen=all", "/a.png", "--all-spaces"],
+  ])
+  func allSpacesAcceptsAPictureOnAllScreens(arguments: [String]) throws {
+    let command = try parse(Picture.self, arguments)
+    #expect(command.allSpaces)
+    #expect(command.picture == "/a.png")
+    #expect(command.screens.screen == .all)
+  }
+
+  @Test func allSpacesRequiresAPicture() {
+    let invalid = [
+      ["picture", "--all-spaces"],
+      ["picture", "--all-spaces", "--screen", "all"],
+    ]
+    for arguments in invalid {
+      let message = parseFailure(arguments)
+      #expect(message.contains("--all-spaces requires a picture"), "\(arguments): \(message)")
+    }
+  }
+
+  @Test(arguments: [
+    ["picture", "--all-spaces", "--screen", "main", "/a.png"],
+    ["picture", "--all-spaces", "-s", "0", "/a.png"],
+    ["picture", "/a.png", "--screen", "2", "--all-spaces"],
+  ])
+  func allSpacesRejectsASpecificScreen(arguments: [String]) {
+    let message = parseFailure(arguments)
+    #expect(message.contains("--all-spaces sets the picture for all screens"), "\(message)")
+  }
+
+  @Test(arguments: [
+    ["--all-spaces"],
+    ["--all-spaces", "picture", "/a.png"],
+    ["color", "--all-spaces"],
+    ["color", "000000", "--all-spaces"],
+    ["scale", "--all-spaces", "fit"],
+    ["manage", "--all-spaces"],
+  ])
+  func allSpacesOnlyBelongsToPicture(arguments: [String]) {
+    #expect(throws: (any Error).self) { try Desktoppr.parseAsRoot(arguments) }
+  }
+
+  @Test func pictureHelpDocumentsAllSpaces() {
+    #expect(Picture.helpMessage().contains("--all-spaces"))
   }
 
   // MARK: color

@@ -28,6 +28,23 @@ struct Picture: ParsableCommand {
     completion: .file())
   var picture: String?
 
+  @Flag(
+    help: """
+      Also set the picture for every Space (desktop), including Spaces created later. \
+      Requires a picture, and applies to all screens.
+      """)
+  var allSpaces = false
+
+  func validate() throws {
+    guard allSpaces else { return }
+    guard picture != nil else {
+      throw ValidationError("--all-spaces requires a picture to set.")
+    }
+    guard screens.screen == .all else {
+      throw ValidationError("--all-spaces sets the picture for all screens; remove --screen.")
+    }
+  }
+
   func run() throws {
     // Check the screen before downloading anything.
     let targets = try screens.screen.screens()
@@ -41,7 +58,7 @@ struct Picture: ParsableCommand {
     warnIfRoot()
     let url = try resolvePicture(picture)
     if case .all = screens.screen {
-      setAllDesktopImages(url: url)
+      try setAllDesktopImages(url: url, allSpaces: allSpaces)
     } else {
       for screen in targets {
         setDesktopImage(url: url, for: screen)
@@ -129,7 +146,7 @@ struct Manage: ParsableCommand {
       setFillColor(color: color.color)
     }
     setImageScaling(Defaults.scale)
-    setAllDesktopImages(url: fileURL)
+    try setAllDesktopImages(url: fileURL, allSpaces: Defaults.allSpaces)
   }
 
   /// Compares against the configured checksum, if any. Exits with 9 on a mismatch.
