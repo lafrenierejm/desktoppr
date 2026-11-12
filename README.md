@@ -93,7 +93,7 @@ macOS keeps a separate wallpaper for every Space (desktop), and `desktoppr` norm
 $ desktoppr picture --all-spaces "/Library/Desktop Pictures/BoringBlueDesktop.png"
 ```
 
-`--all-spaces` only applies when setting a picture on all screens, so it needs a picture and cannot be combined with `--screen main` or a screen index. It works by copying the new setting within macOS's private wallpaper store (`~/Library/Application Support/com.apple.wallpaper/Store/Index.plist`), which Apple does not document and may change. `desktoppr` waits up to 15 seconds for macOS to record the new picture and exits with an error if that does not happen.
+`--all-spaces` only applies when setting a picture on all screens, so it needs a picture and cannot be combined with `--screen main` or a screen index. It works by copying the new setting within macOS's private wallpaper store (`~/Library/Application Support/com.apple.wallpaper/Store/Index.plist`), which Apple does not document and may change. `desktoppr` waits up to 15 seconds for macOS to record the new picture and exits with an error if that does not happen. It then restarts `WallpaperAgent` (launchd relaunches it right away), which macOS needs to apply the edited store.
 
 ## Using `desktoppr` in scripts
 

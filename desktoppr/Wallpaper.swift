@@ -119,6 +119,22 @@ func setAllDesktopImages(url: URL, allSpaces: Bool = false) throws {
     } catch {
       throw RuntimeError("could not set the picture for all spaces: \(error)")
     }
+    restartWallpaperAgent()
+  }
+}
+
+/// Restarts `WallpaperAgent` (launchd relaunches it) so it reloads the edited wallpaper store.
+func restartWallpaperAgent() {
+  let killall = Process()
+  killall.executableURL = URL(fileURLWithPath: "/usr/bin/killall")
+  killall.arguments = ["WallpaperAgent"]
+  killall.standardOutput = FileHandle.nullDevice
+  killall.standardError = FileHandle.nullDevice
+  do {
+    try killall.run()
+    killall.waitUntilExit()
+  } catch {
+    errprint("warning: could not restart WallpaperAgent: \(error)")
   }
 }
 
