@@ -182,3 +182,6 @@ Build with `swift build` or `nix build`.
 
 Run the tests with `swift test --disable-xctest`, or `run-tests` in the Nix devshell, which adds the flag for you because XCTest is not available under Nix.
 `nix flake check` also runs the tests along with the formatters and other checks.
+
+Building requires the Swift 6 toolchain (the package uses Swift 6 language mode) and macOS 14 or later.
+CI runs `nix flake check` on every pull request.
