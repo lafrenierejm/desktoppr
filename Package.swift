@@ -3,8 +3,8 @@ import PackageDescription
 
 let package = Package(
   name: "desktoppr",
-  // swift-argument-parser links Swift Concurrency, which ships with macOS 12.
-  platforms: [.macOS(.v12)],
+  // Swift Testing, used by the tests, requires macOS 14.
+  platforms: [.macOS(.v14)],
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.8.2")
   ],
@@ -27,7 +27,15 @@ let package = Package(
           "-Xlinker", "\(Context.packageDirectory)/desktoppr/Info.plist",
         ])
       ]
-    )
+    ),
+    .testTarget(
+      name: "desktopprTests",
+      dependencies: [
+        "desktoppr",
+        .product(name: "ArgumentParser", package: "swift-argument-parser"),
+      ],
+      path: "Tests/desktopprTests"
+    ),
   ],
   // The sources predate Swift 6 strict concurrency.
   swiftLanguageModes: [.v5]

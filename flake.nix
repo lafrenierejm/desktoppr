@@ -47,8 +47,9 @@
               src = pkgs.lib.fileset.toSource {
                 root = ./.;
                 fileset = pkgs.lib.fileset.unions [
-                  ./Package.swift
                   ./Package.resolved
+                  ./Package.swift
+                  ./Tests
                   ./desktoppr
                 ];
               };
@@ -57,6 +58,10 @@
                 swift
                 swiftpm
               ];
+
+              # SwiftPM passes a macOS `--target` that differs from the wrapped compiler's
+              # default, which makes cc-wrapper warn on every invocation.
+              env.NIX_CC_WRAPPER_SUPPRESS_TARGET_WARNING = "1";
 
               # The dependencies pinned in `Package.resolved`.
               # Refresh `hash` after updating dependencies by setting to empty string and copying the hash from the error.
@@ -83,6 +88,21 @@
             });
             default = self'.packages.desktoppr;
           };
+
+          # Runs `swift test` on a debug build.
+          checks.tests = self'.packages.desktoppr.overrideAttrs (old: {
+            pname = "desktoppr-tests";
+            doCheck = true;
+            swiftpmBuildConfig = "debug";
+            swiftpmFlags = [
+              "--disable-xctest" # tests use Swift Testing
+              "--disable-get-task-allow-entitlement" # `codesign` isn't available in sandbox
+            ];
+            # `swift test` builds what it needs.
+            buildPhase = ":";
+            installPhase = "touch $out";
+            meta = removeAttrs old.meta [ "mainProgram" ];
+          });
 
           apps.default = {
             type = "app";
@@ -115,6 +135,8 @@
           };
 
           devShells.default = pkgs.mkShell {
+            # See the comment on the package's `env`.
+            env.NIX_CC_WRAPPER_SUPPRESS_TARGET_WARNING = "1";
             # Inherit all of the pre-commit and treefmt hooks.
             inputsFrom = [
               config.pre-commit.devShell
@@ -126,6 +148,10 @@
                 swift
                 swiftpm
                 swiftPackages.sourcekit-lsp
+                # XCTest isn't available under Nix, and SwiftPM can't default this flag.
+                (writeShellScriptBin "run-tests" ''
+                  exec swift test --disable-xctest "$@"
+                '')
               ]);
           };
         };

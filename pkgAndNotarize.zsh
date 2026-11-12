@@ -20,7 +20,7 @@ srcroot="$PWD"
 
 pkg_name="desktoppr"
 identifier="com.scriptingosx.desktoppr"
-min_os_version="12"
+min_os_version="14"
 
 # the version lives in Desktoppr.swift
 version=$(sed -nE 's/^let version = "([^"]+)".*/\1/p' desktoppr/Desktoppr.swift)

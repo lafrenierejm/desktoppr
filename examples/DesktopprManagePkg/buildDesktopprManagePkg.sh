@@ -12,7 +12,7 @@ pkgname="DesktopprManage"
 version="1.1"
 identifier="com.scriptingosx.${pkgname}"
 install_location="/"
-minOSVersion="12"
+minOSVersion="14"
 
 # determine enclosing folder
 projectfolder=$(dirname "$0")

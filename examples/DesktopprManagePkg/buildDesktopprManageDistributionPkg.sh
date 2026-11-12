@@ -12,7 +12,7 @@ pkgname="DesktopprManage"
 version="1.1"
 identifier="com.scriptingosx.${pkgname}"
 install_location="/"
-minOSVersion="12"
+minOSVersion="14"
 
 # replace this with the name of your Developer ID _Installer_ certificate
 # use `security find-identity -p codesigning -v` to list available certs

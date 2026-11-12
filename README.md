@@ -1,6 +1,6 @@
 # Here comes the `desktoppr`!
 
-![](https://img.shields.io/github/v/release/scriptingosx/desktoppr)&nbsp;![](https://img.shields.io/github/downloads/scriptingosx/desktoppr/latest/total)&nbsp;![](https://img.shields.io/badge/macOS-12%2B-success)&nbsp;![](https://img.shields.io/github/license/scriptingosx/desktoppr)
+![](https://img.shields.io/github/v/release/scriptingosx/desktoppr)&nbsp;![](https://img.shields.io/github/downloads/scriptingosx/desktoppr/latest/total)&nbsp;![](https://img.shields.io/badge/macOS-14%2B-success)&nbsp;![](https://img.shields.io/github/license/scriptingosx/desktoppr)
 
 A simple command line tool which can read and set the desktop picture/wallpaper. Credit for the name to [Neil Martin](https://macadmins.slack.com/archives/C19MR7EM9/p1536586211000100).
 
@@ -160,4 +160,11 @@ The examples have [a sample defaults plist with keys](examples/defaults.plist) a
 
 You can get the code for `desktoppr` on my Github page and an installer in the [Releases](https://github.com/scriptingosx/desktoppr/releases). The installer pkg will install the binary in `/usr/local/bin`. Alternatively, a brew cask exists, so you could install it using `brew install --cask desktoppr` if you have [Homebrew](https://brew.sh) installed.
 
-`desktoppr` requires macOS 12 or later.
+`desktoppr` requires macOS 14 or later.
+
+## Development
+
+Build with `swift build` or `nix build`.
+
+Run the tests with `swift test --disable-xctest`, or `run-tests` in the Nix devshell, which adds the flag for you because XCTest is not available under Nix.
+`nix flake check` also runs the tests along with the formatters and other checks.

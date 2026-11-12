@@ -15,7 +15,7 @@ enum ScaleOption: String, CaseIterable, ExpressibleByArgument {
 }
 
 /// Which screen a command applies to.
-enum ScreenSelection: ExpressibleByArgument {
+enum ScreenSelection: Equatable, ExpressibleByArgument {
   case all
   case main
   case index(Int)
@@ -25,7 +25,10 @@ enum ScreenSelection: ExpressibleByArgument {
     case "all": self = .all
     case "main": self = .main
     default:
-      guard let index = Int(argument), index >= 0 else { return nil }
+      // `Int(_:)` would also accept a leading sign.
+      guard argument.allSatisfy({ $0.isASCII && $0.isNumber }), let index = Int(argument) else {
+        return nil
+      }
       self = .index(index)
     }
   }
@@ -65,7 +68,9 @@ struct HexColor: ExpressibleByArgument {
 
   init?(argument: String) {
     let digits = argument.hasPrefix("#") ? String(argument.dropFirst()) : argument
-    guard digits.count == 6, let code = Int(digits, radix: 16) else { return nil }
+    // `Int(_:radix:)` would also accept a leading sign.
+    guard digits.count == 6, digits.allSatisfy(\.isHexDigit), let code = Int(digits, radix: 16)
+    else { return nil }
     color = NSColor(
       calibratedRed: CGFloat((code >> 16) & 0xff) / 0xff,
       green: CGFloat((code >> 8) & 0xff) / 0xff,
