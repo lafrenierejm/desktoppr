@@ -26,6 +26,17 @@ func errprint(_ error: String) {
   FileHandle.standardError.write(Data((error + "\n").utf8))
 }
 
+/// Holds a value written by a completion handler and read after it has finished.
+private final class Locked<Value: Sendable>: @unchecked Sendable {
+  private let lock = NSLock()
+  private var stored: Value?
+
+  var value: Value? {
+    get { lock.withLock { stored } }
+    set { lock.withLock { stored = newValue } }
+  }
+}
+
 func download(from url: URL) -> String? {
   //  var headRequest = URLRequest(url: url)
   //  headRequest.httpMethod = "HEAD"
@@ -43,7 +54,7 @@ func download(from url: URL) -> String? {
   //  headSemaphore.wait()
 
   let request = URLRequest(url: url)
-  var newImage: URL? = nil
+  let newImage = Locked<URL>()
   let semaphore = DispatchSemaphore(value: 0)
 
   let downloadTask = URLSession.shared.downloadTask(with: request) {
@@ -75,12 +86,12 @@ func download(from url: URL) -> String? {
     } catch {
       return
     }
-    newImage = newURL
+    newImage.value = newURL
   }
 
   downloadTask.resume()
   semaphore.wait()
-  return newImage?.path
+  return newImage.value?.path
 }
 
 /// Resolves a file path or an http(s) URL to a local file, downloading if needed.
